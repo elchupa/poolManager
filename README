@@ -1,0 +1,14 @@
+poolManager is a way to manage what pools your miners work at easily.
+
+It will not provide automatic mechnisms to pool hop, that will have to be done manually.
+
+Dependencies:
+	Pymongo
+	
+Basis is that this will act as a mining proxy for your workers.
+Each worker will connect to this pool with a unique ID, passwords will be optional
+and the requirement of them will be set in the admin panel.
+
+You will be able to add pools through python modules, and then you can shift which pool
+your workes mine from easily from the admin panel. Note again that the miners will not
+hop the pools but stick to a single pool until they are shifted to a new pool.
