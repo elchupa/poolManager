@@ -13,6 +13,8 @@ from binascii import a2b_hex, b2a_hex
 from Utils import swap32, sha2int, sha2x
 from datetime import datetime
 
+import pycurl
+
 
 class GetWork:
 	def __init__( self, database, poolname ):
@@ -38,15 +40,15 @@ class GetWork:
 			
 		self.targetInt = sha2int( sha2x( self.target ) )
 		
-		self.header = { "Authorization": "Basic " + self.authorizationStr, "user-agent": "curl", "content-type": "text/plain" }
+		self.header = { "Authorization": "Basic " + self.authorizationStr, "User-Agent": "polcbm", "Content-Type": "text/plain" }
 		self.url = "http://" + self.address + ":" + str(self.port)
 		
 	def getWork( self, minerName ):
 	
-		request = json.dumps( { "method": "getwork", "params": [], "id": self.id } )
+		request = json.dumps( { "method": "getwork", "params": [], "id": "json" } )
 		self.id += 1
 		try:
-			ret, content = self.http_pool.request( self.url, "post", headers=self.header, body=request )
+			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
 		except Exception, e:
 			print "Error getting work: " + str( e )
 			
@@ -56,10 +58,10 @@ class GetWork:
 			message = json.loads( content )
 		except:
 			print "Error decoding json:", content
-			
+	
 		self.db.incGetWork( self.poolname )
 			
-		return message['result'], ret, minerName
+		return message, ret, minerName
 	
 	def submit( self, minerName, work):
 	
@@ -72,15 +74,15 @@ class GetWork:
 		ret = ""
 		content = ""
 		try:
-			ret, content = self.http_pool.request( self.url, "post", headers=self.header, body=request )
+			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
 		except Exception, e:
 			print "Error submitting work: " + str( e )
 		
 		try:
 			message = json.loads( content )
 			
-			if message['result']:
-				self.db.incBlocksFound( self.poolname )
+			#if message['result']:
+			#	self.db.incBlocksFound( self.poolname )
 			
 		except Exception, e:
 			print "Error decoding json:", content
@@ -89,12 +91,12 @@ class GetWork:
 			message['result'] = True
 			
 		share = self.db.addShare( self.poolname, validity['share'] )
-		
-		if not share:
+		if share:
 			message['result'] = False
 			print "Stale share"
-		else:
 			self.db.incStales( self.poolname )
+		else:
+			self.db.incShares( self.poolname )
 		
 		return message, ret, minerName
 	

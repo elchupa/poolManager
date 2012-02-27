@@ -38,6 +38,28 @@ class PoolStore:
 		self.collection.ensure_index( "name", unique=True )
 		self.users = users
 		
+	def addPool( self, poolname, address, port, username, password, timeout ):
+		pool = {}
+		pool['name'] = poolname
+		pool['address'] = address
+		pool['port'] = int( port )
+		pool['username'] = username
+		pool['password'] = password
+		pool['timeout'] = timeout
+		pool['shares'] = 0
+		pool['lastShare'] = datetime.now()
+		pool['stales'] = 0
+		pool['lastStale'] = datetime.now()
+		pool['shareStore'] = []
+		pool['getworks'] = 0
+		pool['lastGetWork'] = datetime.now()
+		pool['blocksFound'] = 0
+		pool['lastBlockFound'] = datetime.now()
+		pool['users'] = []
+		
+		return self.collection.save( pool )
+		
+		
 	def getPool( self, poolName ):
 		return self.collection.find_one( { "name": poolName } )
 		
@@ -77,10 +99,10 @@ class PoolStore:
 		
 		self.collection.save( p )
 		
-	def incShares( self, pool ):
+	def incStales( self, pool ):
 		p = self.getPool( pool )
 		
-		if "stales" in p:
+		if "stale" in p:
 			p['stales'] += 1
 		else:
 			p['stales'] = 1
@@ -104,8 +126,6 @@ class PoolStore:
 			
 		self.collection.save( p )
 		
-		print p
-		
 		return stale
 		
 	def incBlocksFound( self, pool ):
@@ -123,12 +143,25 @@ class PoolStore:
 		if self.collection.find( { "name": poolname, "users": { "$in": [ user['_id'] ] } } ).count() == 0:
 			self.collection.update( { "name": poolname }, { "$push": { "users": user['_id'] } } )
 		
+	def totalPools( self ):
+		return self.collection.find().count()
+		
+	def totalShares( self ):
+		shares = self.collection.group( ["shares"], { "shares": { "$gte": 0 } }, {'csum': 0 }, "function( obj, prev ) { prev.csum += obj.shares; }" );
+		
+		total = 0
+		
+		for s in shares:
+			total += int( s['shares'] )
+		
+		return total
 if __name__ == "__main__":
 	
 	u = UserStore( "config.json" )
 	p = PoolStore( "config.json", u )
 	
 	pool = p.getPool( "mine" )
+	#pool['stales'] = 0
 	#pool['users'] = []
 	#pool['timeout'] = 5
 	#pool['target'] = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000"
@@ -142,4 +175,4 @@ if __name__ == "__main__":
 	#print p.addUser( "mine", "testing" )
 	#print p.addUser( "mine", "testing2" )
 	
-	print p.getPool( "mine" )
+	pool = p.addPool( "triplemining.com", "eu.triplemining.com", 8344, "elchupa_elchupa", "elchupa", 10 )

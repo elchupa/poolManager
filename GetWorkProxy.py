@@ -41,8 +41,7 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 			answer = self.getwork.submit( ( username, password ), body )
 			if answer[0]['result']:
 				self.users.incShare( username, password )
-			self.write( answer[0] )
-			
+
 	def checkMiner( self, username, password ):
 		user = self.users.getUser( username, password )
 		

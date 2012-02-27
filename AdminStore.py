@@ -53,6 +53,9 @@ class AdminStore:
 			return None
 			
 		return self.collection.find_one( { "username": username, "password": base64.b64encode( sha2x( password ) ) } )
+		
+	def totalAdmins( self ):
+		return self.collection.find().count()
 
 if __name__ == "__main__":
 	a = AdminStore( "config.json" )

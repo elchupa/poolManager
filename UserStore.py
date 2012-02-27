@@ -70,6 +70,9 @@ class UserStore:
 	
 	def getAll( self ):
 		return self.collection.find()
+		
+	def totalUsers( self ):
+		return self.getAll().count()
 	
 if __name__ == "__main__":
 	u = UserStore( "config.json" )
