@@ -1,9 +1,0 @@
-{
-	"address": "127.0.0.1",
-	"port": 8332,
-	"username": "elchupa2",
-	"password": "elchupa2",
-	"timeout": 10,
-	"target": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000",
-	"pool": "mine"
-}
