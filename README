@@ -25,8 +25,17 @@ Features:
 				formula choice and pool target's.
 	- Web interface:
 		- Admin panel for changing settings on the fly.
+			- Change the pool.
+			- Ban miners.
+			- Segment miners across multiple pools.
 		- Failover pool adding.
 		- Graphs because graphs are nice.
+		- User Registration, or allocation by admin.
+		- User can add new miners to the system, if required to
+			by the admin.
+		- Users will be able to get detailed stats for their 
+			miners.
+		- Pulls stats to a CSV.
 		
 This project is not a pool hopper, although it could be extended to be
 one. The default code does not provide this functionality.
