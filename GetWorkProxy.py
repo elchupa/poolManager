@@ -38,16 +38,22 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 			work['id'] = body['id']
 			self.write( work )
 		elif body['method'] == "getwork" and body['params'] != []:
-			answer = self.getwork.submit( username, body )
+			answer = self.getwork.submit( ( username, password ), body )
 			if answer[0]['result']:
-				print "Valid share"
+				self.users.incShare( username, password )
 			self.write( answer[0] )
 			
 	def checkMiner( self, username, password ):
+		user = self.users.getUser( username, password )
+		
+		if user == None:
+			return False
 		return True
+		
 
 if __name__ == "__main__":
 	from PoolStore import PoolStore
+	from UserStore import UserStore
 	
 	p = PoolStore( "config.json" )
 	u = UserStore( "config.json" )

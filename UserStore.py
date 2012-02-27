@@ -33,8 +33,14 @@ class UserStore:
 		self.collection.ensure_index( "username", unique=True )
 	
 	def getUser( self, username="", password=None ):
-	
-		user = self.collection.find_one( { "username": username } )
+		
+		user = {}
+		
+		try:
+			if self.config['users']['requirePassword']:
+				user = self.collection.find_one( { "username": username, "password": password } )
+		except:
+			user = self.collection.find_one( { "username": username } )
 		
 		if user == None:
 			user = { "username": username, "password": password, "shares": 0, "lastShare": datetime.now() }
@@ -44,9 +50,19 @@ class UserStore:
 		return user
 	
 	def incShare( self, username="", password="" ):
+		user = self.getUser( username, password )
 		
-
+		user['shares'] += 1
+		user['lastShare'] = datetime.now()
+		
+		self.collection.save( user )
+		#self.collection.update( { "username": username, "password":password }, user )
+	
+	def getAll( self ):
+		return self.collection.find()
+	
 if __name__ == "__main__":
 	u = UserStore( "config.json" )
 	
 	print u.getUser( "test" )
+	

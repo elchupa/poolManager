@@ -64,6 +64,8 @@ class GetWork:
 			print "Valid share"
 			
 		request = json.dumps( work )
+		ret = ""
+		content = ""
 		try:
 			ret, content = self.http_pool.request( self.url, "post", headers=self.header, body=request )
 		except Exception, e:
