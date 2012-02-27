@@ -1,14 +1,30 @@
 poolManager is a way to manage what pools your miners work at easily.
 
-It will not provide automatic mechnisms to pool hop, that will have to be done manually.
-
 Dependencies:
 	Pymongo
 	
-Basis is that this will act as a mining proxy for your workers.
-Each worker will connect to this pool with a unique ID, passwords will be optional
-and the requirement of them will be set in the admin panel.
+This project aims to provide a easily extensible and clean interface
+to one's bitcoin miners. The inspiration was to extend bitHopper but
+this changed to a complete rewrite from scratch as I wanted to provide
+my own features and extensions that would not work in the original
+bitHopper code this this project was started.
 
-You will be able to add pools through python modules, and then you can shift which pool
-your workes mine from easily from the admin panel. Note again that the miners will not
-hop the pools but stick to a single pool until they are shifted to a new pool.
+Features:
+	- Pool management:
+		- Username and Password changes.
+		- Address changes.
+		- Port changes.
+		- Timeout changes.
+	- Miner statistics:
+		- 15m, 1day, and 7day hash rate averages.
+		- Shares and stales per day.
+		- Estimated earnings per miner per pool.
+			- This will be a rough estimate and is dependent on
+				formula choice and pool target's.
+	- Web interface:
+		- Admin panel for changing settings on the fly.
+		- Failover pool adding.
+		- Graphs because graphs are nice.
+		
+This project is not a pool hopper, although it could be extended to be
+one. The default code does not provide this functionality.
