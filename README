@@ -2,6 +2,8 @@ poolManager is a way to manage what pools your miners work at easily.
 
 Dependencies:
 	Pymongo
+	Tornado Web Server
+	Some Json Library
 	
 This project aims to provide a easily extensible and clean interface
 to one's bitcoin miners. The inspiration was to extend bitHopper but
