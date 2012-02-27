@@ -16,7 +16,9 @@ from datetime import datetime
 
 class GetWork:
 	def __init__( self, database, poolname ):
-		self.config = database.getPool( poolname )
+		self.db = database
+		self.poolname = poolname
+		self.config = self.db.getPool( self.poolname )
 		self.address = self.config['address']
 		self.port = self.config['port']
 		self.username = self.config['username']
@@ -43,16 +45,19 @@ class GetWork:
 	
 		request = json.dumps( { "method": "getwork", "params": [], "id": self.id } )
 		self.id += 1
-	
 		try:
 			ret, content = self.http_pool.request( self.url, "post", headers=self.header, body=request )
 		except Exception, e:
-			print "Error getting work: " + str(e )
+			print "Error getting work: " + str( e )
+			
+		miner = self.db.addUser( self.poolname, minerName )
 			
 		try:
 			message = json.loads( content )
 		except:
 			print "Error decoding json:", content
+			
+		self.db.incGetWork( self.poolname )
 			
 		return message['result'], ret, minerName
 	
@@ -73,11 +78,23 @@ class GetWork:
 		
 		try:
 			message = json.loads( content )
+			
+			if message['result']:
+				self.db.incBlocksFound( self.poolname )
+			
 		except Exception, e:
 			print "Error decoding json:", content
 		
 		if validity['status']:
 			message['result'] = True
+			
+		share = self.db.addShare( self.poolname, validity['share'] )
+		
+		if not share:
+			message['result'] = False
+			print "Stale share"
+		else:
+			self.db.incStales( self.poolname )
 		
 		return message, ret, minerName
 	

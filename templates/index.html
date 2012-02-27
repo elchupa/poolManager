@@ -1,0 +1,49 @@
+<html>
+	<head>
+		<title>Index | poolManager v1.0 by elchupathingy</title>
+		<style type='text/css'>
+		#page_container
+		{
+			width: 1024;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		</style>
+		<script type='text/javascript' src='http://code.jquery.com/jquery-1.7.1.js'></script>
+		<script type='text/javascript'>
+		$(document).ready( function()
+		{
+			updatePools();
+			updateUsers();
+			setInterval( "updatePools()", 1000 );
+			setInterval( "updateUsers()", 1000 );
+		});
+		
+		function updatePools()
+		{
+			$('#pools').load( "/getpools" );
+		}
+		
+		function updateUsers()
+		{
+			$('#users').load( "/getusers" )			
+		}
+		</script>
+	</head>
+	<body>
+		<div id='page_container'>
+			<div id='banner'><h3>Banner Place holder</h3></div>
+			<div id='menu'></div>
+			<div id='pools'>
+				<table>
+					<tr><td>Loading Pool Data...</td></tr>
+				</table>
+			</div>
+			<div id='users'>
+				<table>
+					<tr><td>Loading User Data...</td></tr>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>

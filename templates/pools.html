@@ -1,0 +1,6 @@
+<table>
+	<th>Pool name</th><th>Blocks Solved</th><th>Total Shares</th><th>Get works per/hr</th><th>Last GetWork</th>
+	{% for p in pools %}
+		<tr><td><a href='/pool/{{ p['name'] }}'>{{ p['name'] }}</a></td><td>{{ p['blocksFound'] }} </td><td>{{ p['shares'] }}</td><td>{{ p['getworks'] }}</td><td>{{ p['lastGetWork'] }}</td></tr>
+	{% end %}
+</table>

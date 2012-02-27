@@ -48,6 +48,16 @@ class UserStore:
 			user = self.collection.find_one( { "username": username } )
 
 		return user
+		
+	def getUsers( self, userids ):
+		users = self.collection.find( { "_id": { "$in": userids } } )
+		
+		ret = []
+		
+		for u in users:
+			ret.append( u )
+			
+		return ret
 	
 	def incShare( self, username="", password="" ):
 		user = self.getUser( username, password )

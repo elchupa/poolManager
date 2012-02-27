@@ -1,0 +1,32 @@
+<html>
+	<head>
+		<title>{{ pool['name'] }} | poolManager v1.0 by elchupathingy</title>
+		<style type='text/css'>
+		#page_container
+		{
+			width: 1024;
+			margin-left: auto;
+			margin-right: auto;
+		}
+		</style>
+	</head>
+	<body>
+		<div id='page_container'>
+			<div id='banner'><h3>Banner Place holder</h3></div>
+			<div id='menu'></div>
+			<div id='pools'>
+				<fieldset>
+					<legend>{{ pool['name'] }}</legend>
+					<div id='users'>
+						<table>
+							<th>Username</th><th>Shares</th><th>Last Submit Time</th>
+							{% for u in users %}
+								<tr><td><a href='/user/{{ u['username'] }}'>{{ u['username'] }}</a></td><td>{{ u['shares'] }}</td><td>{{ u['lastShare'] }}</td></tr>
+							{% end %}
+						</table>
+					</div>
+				</fieldset>
+			</div>
+		</div>
+	</body>
+</html>

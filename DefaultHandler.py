@@ -13,8 +13,12 @@ class DefaultHandler( tornado.web.RequestHandler ):
 		self.poolname = poolname
 	
 	def get( self ):
-		users = self.userdb.getAll()
-		self.write( "<table>" )
-		for user in users:
-			self.write( "<tr><td>Username: " + user['username'] + "</td><td>Shares: " + str( user['shares'] ) + "</td><td>Last Share Time: " + str( user['lastShare'] ) + "</td></tr>" )
-		self.write( "</table>" )
+		
+		if self.request.uri == "/":
+			self.render( "./templates/index.html" )
+		elif self.request.uri == "/getusers":
+			users = self.userdb.getAll()
+			self.render( "./templates/users.html", users=users )
+		elif self.request.uri == "/getpools":
+			pools = self.pooldb.getAll()
+			self.render( "./templates/pools.html", pools=pools )
