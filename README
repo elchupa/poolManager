@@ -9,7 +9,7 @@ This project aims to provide a easily extensible and clean interface
 to one's bitcoin miners. The inspiration was to extend bitHopper but
 this changed to a complete rewrite from scratch as I wanted to provide
 my own features and extensions that would not work in the original
-bitHopper code this this project was started.
+bitHopper code thus this project was started.
 
 Features:
 	- Pool management:
