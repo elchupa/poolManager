@@ -15,9 +15,8 @@ from datetime import datetime
 
 
 class GetWork:
-	def __init__( self, config ):
-		self.config = Config( config )
-		
+	def __init__( self, database, poolname ):
+		self.config = database.getPool( poolname )
 		self.address = self.config['address']
 		self.port = self.config['port']
 		self.username = self.config['username']

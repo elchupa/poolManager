@@ -19,22 +19,23 @@ from Config import Config
 #00000000000000000000000000000000000000000000000000a4362300000000
 
 class GetWorkHandler( tornado.web.RequestHandler ):
-	def initialize( self ):
-		self.getwork = GetWork( "test.json" )
-		self.config = Config( "test.json" )
+	def initialize( self, sharedb, usersdb, poolname ):
+		self.getwork = GetWork( sharedb, poolname )
+		self.users = usersdb
 		
 	def post( self ):
 		body = json.loads( self.request.body )
 		username, password = base64.b64decode( self.request.headers['Authorization'][6:] ).split( ":" )
+		
 		if self.checkMiner( username, password ):
-			print "Valid Miner"
+			pass
+			
 		if body['method'] == "getwork" and body['params'] == []:
 			work_tuple = self.getwork.getWork( "test" )
 			work = work_tuple[0]
 			work['target'] = self.getwork.target
 			work['error'] = None
 			work['id'] = body['id']
-			print "getWork"
 			self.write( work )
 		elif body['method'] == "getwork" and body['params'] != []:
 			answer = self.getwork.submit( username, body )
@@ -46,8 +47,13 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 		return True
 
 if __name__ == "__main__":
-
-	application = tornado.web.Application( [ (r"/", GetWorkHandler) ], debug=True )
+	from PoolStore import PoolStore
+	
+	p = PoolStore( "config.json" )
+	u = UserStore( "config.json" )
+	
+	application = tornado.web.Application( [ (r"/", GetWorkHandler, dict(sharedb=p, usersdb=u, poolname="mine") ) ], debug=True )
+	
 	http_server = tornado.httpserver.HTTPServer(application)
 	http_server.listen(8888)
 	tornado.ioloop.IOLoop.instance().start()
