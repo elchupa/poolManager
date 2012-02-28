@@ -12,6 +12,7 @@ class PoolHandler( tornado.web.RequestHandler ):
 		self.users = users
 	
 	def get( self, poolname ):
+		poolname = poolname.replace( "+", " " )
 		pool = self.pools.getPool( poolname )
 		users = self.users.getUsers( pool['users'] )
 		

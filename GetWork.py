@@ -40,7 +40,7 @@ class GetWork:
 			
 		self.targetInt = sha2int( sha2x( self.target ) )
 		
-		self.header = { "Authorization": "Basic " + self.authorizationStr, "User-Agent": "polcbm", "Content-Type": "text/plain" }
+		self.header = { "X-Mining-Extensions": "longpoll", "Authorization": "Basic " + self.authorizationStr, "User-Agent": "polcbm", "Content-Type": "text/plain" }
 		self.url = "http://" + self.address + ":" + str(self.port)
 		
 	def getWork( self, minerName, minerPassword ):
@@ -99,6 +99,11 @@ class GetWork:
 			#	self.db.incBlocksFound( self.poolname )
 			
 		except Exception, e:
+			try:
+				ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
+				message = json.loads( content )
+			except Exception, e:
+				print "Error submitting work: " + str( e )
 			print "Error decoding json:", content
 		
 		if validity['status']:
