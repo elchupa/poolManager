@@ -31,7 +31,7 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 			pass
 			
 		if body['method'] == "getwork" and body['params'] == []:
-			work_tuple = self.getwork.getWork( username )
+			work_tuple = self.getwork.getWork( username, password )
 			work = work_tuple[0]
 			work['target'] = self.getwork.target
 			work['error'] = None

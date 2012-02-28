@@ -43,7 +43,7 @@ class GetWork:
 		self.header = { "Authorization": "Basic " + self.authorizationStr, "User-Agent": "polcbm", "Content-Type": "text/plain" }
 		self.url = "http://" + self.address + ":" + str(self.port)
 		
-	def getWork( self, minerName ):
+	def getWork( self, minerName, minerPassword ):
 	
 		request = json.dumps( { "method": "getwork", "params": [], "id": "json" } )
 		self.id += 1
@@ -52,16 +52,28 @@ class GetWork:
 		except Exception, e:
 			print "Error getting work: " + str( e )
 			
-		miner = self.db.addUser( self.poolname, minerName )
-			
-		try:
-			message = json.loads( content )
-		except:
-			print "Error decoding json:", content
+		miner = self.db.addUser( self.poolname, minerName, minerPassword )
+		
+		message = {
+				"result": None,
+				"error": {
+				"code": -1,
+				"message": "unregistered miner"
+				},
+				"id": 1
+				}
+		
+		if miner:
+			try:
+				message = json.loads( content )
+			except:
+				print "Error decoding json:", content
 	
-		self.db.incGetWork( self.poolname )
+			self.db.incGetWork( self.poolname )
 
-		return message, ret, minerName
+			return message, ret, minerName
+		else:
+			return message, None, minerName
 	
 	def submit( self, minerName, work):
 	
@@ -74,7 +86,12 @@ class GetWork:
 			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
 		except Exception, e:
 			print "Error submitting work: " + str( e )
-		
+		message = {
+					"version": "1.1",
+					"id": 1,
+					"error": None,
+					"result": False
+				}
 		try:
 			message = json.loads( content )
 			
@@ -91,11 +108,12 @@ class GetWork:
 		
 		if share:
 			message['result'] = False
-			print "Stale share"
-			self.db.incStales( self.poolname )
 		else:
 			self.db.incShares( self.poolname )
 			message['result'] = True
+		
+		if not message['result']:
+			self.db.incStales( self.poolname )
 		
 		return message, ret, minerName
 	

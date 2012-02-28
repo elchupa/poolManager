@@ -61,7 +61,7 @@ class AdminHandler( tornado.web.RequestHandler ):
 				password = self.get_argument( "password" )
 				owner = self.get_argument( "owner" )
 				
-				user = self.users.getUser( user, password, owner )
+				self.users.addUser( user, password, owner )
 				
 				error = "<font color='green'>" + str( user ) + " successfully added.</font><br />"
 				self.render( "./templates/adminminers.html", users=self.users.getAll(), error=error )

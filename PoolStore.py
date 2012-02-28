@@ -137,12 +137,14 @@ class PoolStore:
 		
 		self.collection.save( p )
 		
-	def addUser( self, poolname, username ):
-		user = self.users.getUser( username )
+	def addUser( self, poolname, username, password ):
+		user = self.users.getUser( username, password )
 		
-		if self.collection.find( { "name": poolname, "users": { "$in": [ user['_id'] ] } } ).count() == 0:
-			self.collection.update( { "name": poolname }, { "$push": { "users": user['_id'] } } )
-		
+		if user != None:
+			if self.collection.find( { "name": poolname, "users": { "$in": [ user['_id'] ] } } ).count() == 0:
+				self.collection.update( { "name": poolname }, { "$push": { "users": user['_id'] } } )
+			return True
+		return False
 	def totalPools( self ):
 		return self.collection.find().count()
 		
