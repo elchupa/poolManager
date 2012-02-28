@@ -1,18 +1,54 @@
 <html>
 	<head>
 		<title>Admin Users | poolManager v1.0 by elchupathingy</title>
-		<style type='text/css'>
+		<style>
 		#page_container
 		{
 			width: 1024;
 			margin-left: auto;
 			margin-right: auto;
 		}
+		.invisible
+		{
+			display:none;
+		}
 		</style>
+		<script type='text/javascript' src='http://code.jquery.com/jquery-1.7.1.js'></script>
+		<script type='text/javascript'>
+		$(document).ready( function()
+		{
+			$('button').click( function()
+			{
+				if( $(this).text() == "Delete" )
+				{
+					$.post( "/admin/manusers", { "user": $(this).val(), "submit": "Delete" }, function( data )
+					{
+						$('#' + data ).addClass( "invisible" );
+					}, "text");
+				}
+			});
+		});
+		</script>
 	</head>
 	<body>
-	<div id='page_contain'>
-		<div id='admin_actions'><a href='/admin'>Stats</a>|<a href='/admin/manusers'>Manage Users</a>|<a href='/admin/manminers'>Manage Miners</a>|<a href='/admin/manpools'>Manage Pools</a></div>
+	<div id='page_container'>
+		<div id='admin_actions'><a href='/admin'>Stats</a>|<a href='/admin/manusers'>Manage Users</a>|<a href='/admin/manminers'>Manage Miners</a>|<a href='/admin/manpools'>Manage Pools</a></div><br />
+		<fieldset>
+			<legend>Add Admin</legend>
+			{{ error }} 
+			<form action='/admin/manusers' method='POST'>
+				<label>Username:<input type='text' name='user' value='new user'></label>
+				<label>Password:<input type='password' name='password1' value=''></label>
+				<label>Password:<input type='password' name='password2' value=''></label><br />
+				<input type='submit' name='submit' value='Add User'>
+			</form>
+		</fieldset>
+		<table>
+			<th>Username</th><th>Delete User</th><th>Change Password</th>
+			{% for u in users %}
+				<tr id='{{ u['username'] }}'><td>{{ u['username'] }}</td><td><button value='{{ u['username'] }}' >Delete</button></td><td><button value='{{ u['_id'] }}' >Change Password</button></td></tr>
+			{% end %}
+		</table>
 	</div>
 	</body>
 </html>

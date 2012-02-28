@@ -60,15 +60,12 @@ class GetWork:
 			print "Error decoding json:", content
 	
 		self.db.incGetWork( self.poolname )
-			
+
 		return message, ret, minerName
 	
 	def submit( self, minerName, work):
 	
 		validity = self.checkWorkValidity( minerName, work )
-		
-		if validity['status']:
-			print "Valid share"
 			
 		request = json.dumps( work )
 		ret = ""
@@ -88,15 +85,17 @@ class GetWork:
 			print "Error decoding json:", content
 		
 		if validity['status']:
-			message['result'] = True
+			message['result'] = False
 			
 		share = self.db.addShare( self.poolname, validity['share'] )
+		
 		if share:
 			message['result'] = False
 			print "Stale share"
 			self.db.incStales( self.poolname )
 		else:
 			self.db.incShares( self.poolname )
+			message['result'] = True
 		
 		return message, ret, minerName
 	
@@ -113,7 +112,7 @@ class GetWork:
 			
 		hashInt = sha2int( hash )
 		
-		if hashInt > self.targetInt:
+		if hashInt >= self.targetInt:
 			return { "share": share, "status": False }
 			
 		return { "share": share, "status": True }

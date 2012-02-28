@@ -43,8 +43,7 @@ class AdminStore:
 		user['hashrate'] = 0
 		user['shares'] = 0
 		user['payoutAddress'] = ""
-		
-		print user
+		user['level'] = 1
 		
 		return self.collection.save( user )
 		
@@ -53,6 +52,9 @@ class AdminStore:
 			return None
 			
 		return self.collection.find_one( { "username": username, "password": base64.b64encode( sha2x( password ) ) } )
+		
+	def getAll( self ):
+		return self.collection.find()
 		
 	def totalAdmins( self ):
 		return self.collection.find().count()

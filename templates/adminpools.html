@@ -8,11 +8,51 @@
 			margin-left: auto;
 			margin-right: auto;
 		}
+		.invisible
+		{
+			display:none;
+		}
 		</style>
+		<script type='text/javascript' src='http://code.jquery.com/jquery-1.7.1.js'></script>
+		<script type='text/javascript'>
+		$(document).ready( function()
+		{
+			$('button').click( function()
+			{
+				if( $(this).text() == "Delete" )
+				{
+					$.post( "/admin/manpools", { "pool": $(this).val(), "submit": "Delete" }, function( data )
+					{
+						data = data.replace(".", "_" )
+						$('#' + data ).addClass( "invisible" );
+					}, "text");
+				}
+			});
+		});
+		</script>
 	</head>
 	<body>
-	<div id='page_contain'>
+	<div id='page_container'>
 		<div id='admin_actions'><a href='/admin'>Stats</a>|<a href='/admin/manusers'>Manage Users</a>|<a href='/admin/manminers'>Manage Miners</a>|<a href='/admin/manpools'>Manage Pools</a></div>
+		<fieldset>
+			<legend>Add Pool</legend>
+			{{ error }} 
+			<form action='/admin/manpools' method='POST'>
+				<label>Name:<input type='text' name='name' value='new pool'></label>
+				<label>Address:<input type='text' name='address' value=''></label>
+				<label>Port:<input type='text' name='port' value=''></label>
+				<label>Username:<input type='text' name='username' value=''></label>
+				<label>Password:<input type='text' name='password' value=''></label>
+				<label>Timeout:<input type='text' name='timeout' value='15'></label><br />
+				<input type='submit' name='submit' value='Add Pool'>
+			</form>
+		</fieldset>
+		<table>
+			<th>Pool Name</th><th>Address</th><th>Port</th><th>Username</th><th>Password</th><th>Delete Pool</th>
+			{% for u in pools %}
+				<tr id='{{ u['name'].replace( ".", "_" ) }}'><td>{{ u['name'] }}</td><td>{{ u['address'] }}</td><td>{{ u['port'] }}</td><td>{{ u['username'] }}</td><td>{{ u['password'] }}</td><td><button value='{{ u['username'] }}' >Delete</button></td></tr>
+			{% end %}
+		</table>
 	</div>
 	</body>
 </html>

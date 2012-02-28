@@ -8,11 +8,48 @@
 			margin-left: auto;
 			margin-right: auto;
 		}
+		.invisible
+		{
+			display:none;
+		}
 		</style>
+		<script type='text/javascript' src='http://code.jquery.com/jquery-1.7.1.js'></script>
+		<script type='text/javascript'>
+		$(document).ready( function()
+		{
+			$('button').click( function()
+			{
+				if( $(this).text() == "Delete" )
+				{
+					$.post( "/admin/manminers", { "miner": $(this).val(), "submit": "Delete" }, function( data )
+					{
+						data = data.replace(".", "_" )
+						$('#' + data ).addClass( "invisible" );
+					}, "text");
+				}
+			});
+		});
+		</script>
 	</head>
 	<body>
-	<div id='page_contain'>
+	<div id='page_container'>
 		<div id='admin_actions'><a href='/admin'>Stats</a>|<a href='/admin/manusers'>Manage Users</a>|<a href='/admin/manminers'>Manage Miners</a>|<a href='/admin/manpools'>Manage Pools</a></div>
+		<fieldset>
+			<legend>Add Miner</legend>
+			{{ error }} 
+			<form action='/admin/manusers' method='POST'>
+				<label>Username:<input type='text' name='user' value='new user'></label>
+				<label>Password:<input type='text' name='password' value=''></label>
+				<label>Owner:<input type='text' name='owner' value=''></label><br />
+				<input type='submit' name='submit' value='Add Miner'>
+			</form>
+		</fieldset>
+		<table>
+			<th>Miner Name</th><th>Password</th><th>Owner</th><th>Delete User</th>
+			{% for u in users %}
+				<tr id='{{ u['username'].replace( ".", "_" ) }}'><td>{{ u['username'] }}</td><td>{{ u['password'] }}</td><td>{{ u['owner'] }}</td><td><button value='{{ u['username'] }}' >Delete</button></td></tr>
+			{% end %}
+		</table>
 	</div>
 	</body>
 </html>

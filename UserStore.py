@@ -32,10 +32,8 @@ class UserStore:
 		self.collection = self.db[self.collection]
 		self.collection.ensure_index( "username", unique=True )
 	
-	def getUser( self, username="", password=None ):
-		
+	def getUser( self, username="", password="", owner="" ):
 		user = {}
-		
 		try:
 			if self.config['users']['requirePassword']:
 				user = self.collection.find_one( { "username": username, "password": password } )
@@ -43,7 +41,7 @@ class UserStore:
 			user = self.collection.find_one( { "username": username } )
 		
 		if user == None:
-			user = { "username": username, "password": password, "shares": 0, "lastShare": datetime.now() }
+			user = { "username": username, "password": password, "owner": owner, "shares": 0, "lastShare": datetime.now() }
 			self.collection.save( user )
 			user = self.collection.find_one( { "username": username } )
 
