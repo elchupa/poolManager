@@ -33,10 +33,13 @@ class LongPollHandler( tornado.web.RequestHandler ):
 		self.write( response )
 		self.finish()
 		
+		res = json.loads( response );
+		
+		if res['id'] != -1:
+			self.pools.clearShares( this.poolname )
+		
 	def getThread( self, callback ):
 		self.longpoll.register()
-		
-		print self.longpoll.count
 		
 		while self.longpoll.currentBlock() == True:
 			time.sleep( 5 )

@@ -33,11 +33,11 @@ class PoolManager:
 		self.pools = PoolStore( config, self.users )
 		self.admins = AdminStore( config )
 		
-		self.longpoll = LongPoll( self.pools, "bitcoins lc" )
+		self.longpoll = LongPoll( self.pools, "triplemining.com" )
 		
 		self.getworkApp = tornado.web.Application( [ 
-		(r"/", GetWorkHandler, dict(sharedb=self.pools, usersdb=self.users, poolname="bitcoins lc", longpoll = self.longpoll ) ),
-		( r"/LP", LongPollHandler, dict( pools=self.pools, users=self.users, poolname="bitcoins lc", longpoll = self.longpoll ) )
+		(r"/", GetWorkHandler, dict(sharedb=self.pools, usersdb=self.users, poolname="triplemining.com", longpoll = self.longpoll ) ),
+		( r"/LP", LongPollHandler, dict( pools=self.pools, users=self.users, poolname="triplemining.com", longpoll = self.longpoll ) )
 		] )
 		
 		self.getworkServer = tornado.httpserver.HTTPServer(self.getworkApp)
@@ -49,9 +49,9 @@ class PoolManager:
 		
 		self.frontendApp = tornado.web.Application( 
 		[ 
-			( r"/", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="bitcoins lc" ) ),
-			( r"/getusers", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="bitcoins lc" ) ),
-			( r"/getpools", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="bitcoins lc" ) ),
+			( r"/", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
+			( r"/getusers", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
+			( r"/getpools", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
 			( r"/admin(/[\w\d\+%]+)?", AdminHandler, dict( admins=self.admins,pools=self.pools, users=self.users ) ),
 			( r"/login", LoginHandler, dict( admins=self.admins ) ),
 			( r"/pool/([\w\d\.\+ %]+)", PoolHandler, dict( pools=self.pools, users=self.users ) ),

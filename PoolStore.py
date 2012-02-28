@@ -157,6 +157,13 @@ class PoolStore:
 			total += int( s['shares'] )
 		
 		return total
+	
+	def clearShares( self, poolname ):
+		p = self.getPool( poolname )
+		p['shares'] = []
+		
+		self.collection.save( p )
+		
 if __name__ == "__main__":
 	
 	u = UserStore( "config.json" )

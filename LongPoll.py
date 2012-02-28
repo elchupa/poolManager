@@ -55,6 +55,9 @@ class LongPoll:
 		
 		self.lock.release()
 		
+		if self.count == 0:
+			self.newWork = ""
+		
 		return self.newWork
 		
 	def conect( self, longPollUrl ):
@@ -81,7 +84,9 @@ class LongPoll:
 			print "Not all Clients have gotten the new work"
 
 	def gotBlockNotification( self, response ):
-		if response.code != 200:
+		print response.code
+		print response.buffer.getvalue()
+		if response.code != 200:	
 			pool = self.pools.getPool( self.poolname )
 			http = AsyncHTTPClient()
 			request = HTTPRequest( self.url, "GET", auth_username = pool['username'], auth_password = pool['password'], follow_redirects = True, body=self.request, request_timeout=100000000 )
@@ -90,7 +95,4 @@ class LongPoll:
 			self.connected = True
 			self.connected = False
 			self.receivedBlockMsg = True
-			self.newWork = response
-			
-			print self.newWork
-			print self.newWork
+			self.newWork = response.buffer.getvalue()

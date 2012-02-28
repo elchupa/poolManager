@@ -51,8 +51,6 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 							self.longpoll.updateLongPollUrl( headers['x-long-polling'] )
 						elif "X-Long-Polling" in headers:
 							self.longpoll.updateLongPollUrl( headers['X-Long-Polling'] )
-					
-					print self.longpoll.url
 					self.longpoll.start()
 			
 			self.write( work )
