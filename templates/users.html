@@ -1,5 +1,5 @@
 <table>
-	<th>Username</th><th>Hash Rate</th><th>Shares</th><th>Last Submit Time</th>
+	<th>Username</th><th>Hash Rate</th><th>Shares( {{ totalShares }} )</th><th>Last Submit Time</th>
 	{% for u in users %}
 		<tr><td><a href='/user/{{ u['username'] }}'>{{ u['username'] }}</a></td><td>{{ u['hashrate'] }}</th><td>{{ u['shares'] }}</td><td>{{ u['lastShare'] }}</td></tr>
 	{% end %}

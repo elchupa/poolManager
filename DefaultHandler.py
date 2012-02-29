@@ -22,7 +22,7 @@ class DefaultHandler( tornado.web.RequestHandler ):
 			self.render( "./templates/index.html" )
 		elif self.request.uri == "/getusers":
 			users = self.userdb.getAll()
-			self.render( "./templates/users.html", users=users )
+			self.render( "./templates/users.html", users=users, totalShares=self.userdb.totalShares() )
 		elif self.request.uri == "/getpools":
 			pools = self.pooldb.getAll()
-			self.render( "./templates/pools.html", pools=pools )
+			self.render( "./templates/pools.html", pools=pools, totalShares=self.pooldb.totalShares() )

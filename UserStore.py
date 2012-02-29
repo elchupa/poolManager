@@ -76,6 +76,16 @@ class UserStore:
 		
 	def totalUsers( self ):
 		return self.getAll().count()
+		
+	def totalShares( self ):
+		shares = self.collection.group( ["shares"], { "shares": { "$gte": 0 } }, {'csum': 0 }, "function( obj, prev ) { prev.csum += obj.shares; }" );
+		
+		total = 0
+		
+		for s in shares:
+			total += s['shares']
+		
+		return int( total )
 	
 if __name__ == "__main__":
 	u = UserStore( "config.json" )
