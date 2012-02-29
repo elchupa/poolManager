@@ -7,10 +7,11 @@
 import tornado.web
 
 class AdminHandler( tornado.web.RequestHandler ):
-	def initialize( self, admins, pools, users ):
+	def initialize( self, admins, pools, users, logger ):
 		self.pools = pools
 		self.users = users
 		self.admins = admins
+		self.logger = logger
 		
 	def get_login_url( self ):
 		return "/login"

@@ -6,10 +6,14 @@
 
 import tornado.web
 
+import logging
+
 class PoolHandler( tornado.web.RequestHandler ):
 	def initialize( self, pools, users ):
 		self.pools = pools
 		self.users = users
+		
+		self.logging = logging.getLogger( "PoolManager.Http.PoolHandler" )
 	
 	def get( self, poolname ):
 		poolname = poolname.replace( "+", " " )

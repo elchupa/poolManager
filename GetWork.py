@@ -13,8 +13,9 @@ from binascii import a2b_hex, b2a_hex
 from Utils import swap32, sha2int, sha2x
 from datetime import datetime
 
-import pycurl
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
+import logging
 
 class GetWork:
 	def __init__( self, database, poolname ):
@@ -33,6 +34,8 @@ class GetWork:
 		
 		self.target = ""
 		
+		self.logger = logging.getLogger( "PoolManager.Pool.GetWork" )
+		
 		try:
 			self.target = self.config['target']
 		except:
@@ -47,13 +50,6 @@ class GetWork:
 	
 		request = json.dumps( { "method": "getwork", "params": [], "id": "json" } )
 		self.id += 1
-		try:
-			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
-		except Exception, e:
-			print "Error getting work: " + str( e )
-			
-		miner = self.db.addUser( self.poolname, minerName, minerPassword )
-		
 		message = {
 				"result": None,
 				"error": {
@@ -62,18 +58,25 @@ class GetWork:
 				},
 				"id": 1
 				}
+		try:
+			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
+			
+			miner = self.db.addUser( self.poolname, minerName, minerPassword )
 		
-		if miner:
-			try:
-				message = json.loads( content )
-			except:
-				print "Error decoding json:", content
-	
-			self.db.incGetWork( self.poolname )
+			if miner:
+				try:
+					message = json.loads( content )
+					self.db.incGetWork( self.poolname )
 
-			return message, ret, minerName
-		else:
-			return message, None, minerName
+					return message, ret, minerName
+				except:
+					self.logger.warn( "Error decoding json" )
+			else:
+				return message, None, minerName
+		except Exception, e:
+			self.logger.warn( "Error getting work" )
+			
+		return message, None, minerName
 	
 	def submit( self, minerName, work):
 	
@@ -82,10 +85,6 @@ class GetWork:
 		request = json.dumps( work )
 		ret = ""
 		content = ""
-		try:
-			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
-		except Exception, e:
-			print "Error submitting work: " + str( e )
 		message = {
 					"version": "1.1",
 					"id": 1,
@@ -93,34 +92,35 @@ class GetWork:
 					"result": False
 				}
 		try:
-			message = json.loads( content )
+			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
 			
-			#if message['result']:
-			#	self.db.incBlocksFound( self.poolname )
-			
-		except Exception, e:
 			try:
-				ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
 				message = json.loads( content )
+				
+				#if message['result']:
+				#	self.db.incBlocksFound( self.poolname )
+				
+				if validity['status']:
+					message['result'] = False
+					
+				share = self.db.addShare( self.poolname, validity['share'] )
+				
+				if share:
+					message['result'] = False
+				else:
+					self.db.incShares( self.poolname )
+					message['result'] = True
+				
+				if not message['result']:
+					self.db.incStales( self.poolname )
+				
+				return message, ret, minerName
 			except Exception, e:
-				print "Error submitting work: " + str( e )
-			print "Error decoding json:", content
+				self.logger.warn( "Error Decoding Json submit()" )
+		except Exception, e:
+			self.logger.warn( "Error submitting work" )
 		
-		if validity['status']:
-			message['result'] = False
-			
-		share = self.db.addShare( self.poolname, validity['share'] )
-		
-		if share:
-			message['result'] = False
-		else:
-			self.db.incShares( self.poolname )
-			message['result'] = True
-		
-		if not message['result']:
-			self.db.incStales( self.poolname )
-		
-		return message, ret, minerName
+		return message, None, minerName
 	
 	def checkWorkValidity( self, minerName, work ):
 		share = self.getShare( minerName, work )

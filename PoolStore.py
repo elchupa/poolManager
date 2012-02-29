@@ -95,6 +95,7 @@ class PoolStore:
 		p = self.getPool( pool )
 		
 		p['shares'] += 1
+		p['shares'] = int( p['shares'] )
 		p['lastShare'] = datetime.now()
 		
 		self.collection.save( p )
@@ -160,7 +161,7 @@ class PoolStore:
 	
 	def clearShares( self, poolname ):
 		p = self.getPool( poolname )
-		p['shares'] = []
+		p['shareStore'] = []
 		
 		self.collection.save( p )
 		

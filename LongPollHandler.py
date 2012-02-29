@@ -13,6 +13,7 @@ import base64
 import time
 import threading
 import functools
+import logging
 
 from datetime import datetime
 
@@ -24,6 +25,8 @@ class LongPollHandler( tornado.web.RequestHandler ):
 		self.longpoll = longpoll
 		self.thread = None
 		
+		self.logging = logging.getLogger( "PoolManager.Pool.LongPoolHandler" )
+		
 	@tornado.web.asynchronous
 	def get( self ):
 		self.thread = threading.Thread(target=self.getThread, args=(self.getFinish,) )
@@ -33,10 +36,13 @@ class LongPollHandler( tornado.web.RequestHandler ):
 		self.write( response )
 		self.finish()
 		
-		res = json.loads( response );
+		try:
+			res = json.loads( response );
 		
-		if res['id'] != -1:
-			self.pools.clearShares( this.poolname )
+			if res['id'] != -1:
+				self.pools.clearShares( self.poolname )
+		except:
+			pass
 		
 	def getThread( self, callback ):
 		self.longpoll.register()

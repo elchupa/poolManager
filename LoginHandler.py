@@ -11,7 +11,8 @@ class LoginHandler(tornado.web.RequestHandler):
 	
 	def initialize( self, admins ):
 		self.admins = admins
-
+		self.logger = logging.getLogger( "PoolManager.Http.LoginHandler" )
+		
 	def get( self ):
 			self.render( "./templates/login.html", next=self.get_argument("next", u"/") )
 

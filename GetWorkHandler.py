@@ -56,7 +56,7 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 				self.users.incShare( username, password )
 			
 			if "longpoll" in extensions:
-				self.logger.warn( "Miner Supports Long Polling: %s", username )
+				self.logger.debug( "Miner Supports Long Polling: %s", username )
 				longpoll = "/LP"
 				self.set_header( "X-Long-Polling", longpoll )
 				

@@ -9,6 +9,7 @@
 import threading
 import re
 import json
+import logging
 
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
@@ -19,6 +20,8 @@ class LongPoll:
 		self.count = 0
 		
 		self.url = ""
+		
+		self.logger = logging.getLogger( "PoolManager.Pool.LongPoll" )
 		
 		try:
 			pool = self.getPool( self.poolname )
@@ -41,12 +44,16 @@ class LongPoll:
 	def register( self ):
 		self.lock.acquire()
 		
+		self.logger.debug( "New Miner Connected to LongPoll" )
+		
 		self.count += 1
 		
 		self.lock.release()
 		
 	def deregister( self ):
 		self.lock.acquire()
+		
+		self.logger.debug( "Pushed LongPoll Work to Miner" )
 		
 		self.count -= 1
 		
@@ -60,9 +67,6 @@ class LongPoll:
 		
 		return self.newWork
 		
-	def conect( self, longPollUrl ):
-		print longPollUrl
-		
 	def currentBlock( self ):
 		if self.connected or not self.receivedBlockMsg:
 			return True
@@ -74,19 +78,21 @@ class LongPoll:
 			pool = self.pools.getPool( self.poolname )
 			if not re.match( r"http:\/\/[\w\d\-\.]+(\:[\d]+)?(\/[\w\d\.\-]+)?", self.url ):
 				self.url = "http://" + str( pool['address'] ) + ":" + str( pool['port'] ) + self.url
-			print "Connecting to:", self.url	
+			
+			self.logger.info( "Connecting to LongPoll Server( %s )", self.url )
+			
 			http = AsyncHTTPClient()
 			request = HTTPRequest( self.url, "GET", auth_username = pool['username'], auth_password = pool['password'], follow_redirects = True, body=self.request, request_timeout=100000000 )
 			http.fetch( request, self.gotBlockNotification )
 		
 			self.connected = True
 		else:
-			print "Not all Clients have gotten the new work"
+			self.logger.debug( "Not All Miners have been pushed the LongPoll work" )
 
 	def gotBlockNotification( self, response ):
-		print response.code
-		print response.buffer.getvalue()
+		self.logger.info( "Got a Block Notification and waiting for Miners to get new work" )
 		if response.code != 200:	
+			self.logger.warn( "Error with LongPoll connection" )
 			pool = self.pools.getPool( self.poolname )
 			http = AsyncHTTPClient()
 			request = HTTPRequest( self.url, "GET", auth_username = pool['username'], auth_password = pool['password'], follow_redirects = True, body=self.request, request_timeout=100000000 )

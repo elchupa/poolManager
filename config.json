@@ -15,5 +15,7 @@
 	"users":
 	{
 		"requirePassword": true
-	}
+	},
+	"logLevel": "info",
+	"logFile":"./poolmanager.log"
 }

@@ -6,14 +6,18 @@
 
 import tornado.web
 
+import logging
+
 class DefaultHandler( tornado.web.RequestHandler ):
 	def initialize( self, sharedb, userdb, poolname ):
 		self.pooldb = sharedb
 		self.userdb = userdb
 		self.poolname = poolname
-	
-	def get( self ):
 		
+		self.logger = logging.getLogger( "PoolManager.Http.DefaultHandler" )
+		
+	def get( self ):
+		self.logger.debug( "Got A Request to the home page" )
 		if self.request.uri == "/":
 			self.render( "./templates/index.html" )
 		elif self.request.uri == "/getusers":
