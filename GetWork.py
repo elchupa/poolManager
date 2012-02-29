@@ -28,8 +28,7 @@ class GetWork:
 		self.password = self.config['password']
 		self.timeout = int( self.config['timeout'] )
 		
-		self.authorizationStr = base64.b64encode(self.username + ":" + self.password).replace('\n','')
-		self.http_pool = httplib2.Http( timeout=self.timeout )		
+		self.authorizationStr = base64.b64encode(self.username + ":" + self.password).replace('\n','')	
 		self.id = 0
 		
 		self.target = ""
@@ -59,7 +58,8 @@ class GetWork:
 				"id": 1
 				}
 		try:
-			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
+			http = httplib2.Http( timeout=self.timeout )
+			ret, content = http.request( self.url, "POST", headers=self.header, body=request )
 			
 			miner = self.db.addUser( self.poolname, minerName, minerPassword )
 		
@@ -92,7 +92,8 @@ class GetWork:
 					"result": False
 				}
 		try:
-			ret, content = self.http_pool.request( self.url, "POST", headers=self.header, body=request )
+			http = httplib2.Http( timeout=self.timeout )
+			ret, content = http.request( self.url, "POST", headers=self.header, body=request )
 			
 			try:
 				message = json.loads( content )
