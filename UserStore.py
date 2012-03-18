@@ -52,24 +52,24 @@ class UserStore:
 	
 	def incShare( self, username, password ):
 		user = self.getUser( username, password )
+		if user != None:
+			lastTime = time.mktime( user['lastShare'].timetuple() )
+			user['shares'] += 1
+			user['lastShare'] = datetime.now()
+			currentTime = time.mktime( user['lastShare'].timetuple() )
 		
-		lastTime = time.mktime( user['lastShare'].timetuple() )
-		user['shares'] += 1
-		user['lastShare'] = datetime.now()
-		currentTime = time.mktime( user['lastShare'].timetuple() )
+			if "hashrate" not in user:
+				if currentTime - lastTime == 0:
+					currentTime += 1
+				user['hashrate'] = 4297.97 / ( currentTime - lastTime ) / 2
+			else:
+				if currentTime - lastTime == 0:
+					currentTime += 1
+				user['hashrate'] += 4297.97 / ( currentTime - lastTime ) / 2
+				user['hashrate'] /= 2
 		
-		if "hashrate" not in user:
-			if currentTime - lastTime == 0:
-				currentTime += 1
-			user['hashrate'] = 4297.97 / ( currentTime - lastTime ) / 2
-		else:
-			if currentTime - lastTime == 0:
-				currentTime += 1
-			user['hashrate'] += 4297.97 / ( currentTime - lastTime ) / 2
-			user['hashrate'] /= 2
-		
-		self.collection.save( user )
-		#self.collection.update( { "username": username, "password":password }, user )
+			self.collection.save( user )
+			#self.collection.update( { "username": username, "password":password }, user )
 	
 	def getAll( self ):
 		return self.collection.find()

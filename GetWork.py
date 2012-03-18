@@ -67,15 +67,16 @@ class GetWork:
 				try:
 					message = json.loads( content )
 					self.db.incGetWork( self.poolname )
-
+					del http
 					return message, ret, minerName
 				except:
+					del http
 					self.logger.warn( "Error decoding json" )
 			else:
+				del http
 				return message, None, minerName
 		except Exception, e:
 			self.logger.warn( "Error getting work" )
-			
 		return message, None, minerName
 	
 	def submit( self, minerName, work):
@@ -114,9 +115,10 @@ class GetWork:
 				
 				if not message['result']:
 					self.db.incStales( self.poolname )
-				
+			 	del http
 				return message, ret, minerName
 			except Exception, e:
+				del http
 				self.logger.warn( "Error Decoding Json submit()" )
 		except Exception, e:
 			self.logger.warn( "Error submitting work" )

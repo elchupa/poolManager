@@ -16,6 +16,6 @@
 	{
 		"requirePassword": true
 	},
-	"logLevel": "info",
+	"logLevel": "debug",
 	"logFile":"./poolmanager.log"
 }

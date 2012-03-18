@@ -4,31 +4,38 @@
 	
 	by elchupathingy
 """
+
+#Server stuff
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
 import tornado.web
 
+#Database
 from PoolStore import PoolStore
 from UserStore import UserStore
 from AdminStore import AdminStore
+
+#Config
 from Config import Config
 
+#Handlers
 from GetWorkHandler import GetWorkHandler
 from LongPollHandler import LongPollHandler
 from DefaultHandler import DefaultHandler
 from AdminHandler import AdminHandler
 from LoginHandler import LoginHandler
 from PoolHandler import PoolHandler
+from MemoryDisplayHandler import MemoryDisplayHandler
 
+#Bitcoin Specific
 from LongPoll import LongPoll
 
-import logging
-
+#Utilities
 import base64
 import uuid
-
 import logging
+#from guppy import hpy
 
 class PoolManager:
 	def __init__( self, config ):
@@ -36,6 +43,8 @@ class PoolManager:
 		self.users = UserStore( config )
 		self.pools = PoolStore( config, self.users )
 		self.admins = AdminStore( config )
+		#self.hp = hpy()
+		#self.hp.heap()
 		
 		console = logging.StreamHandler()
 		formatter = logging.Formatter('%(asctime)s: %(name)s - %(levelname)s - %(message)s')
@@ -86,7 +95,8 @@ class PoolManager:
 			( r"/getpools", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
 			( r"/admin(/[\w\d\+%]+)?", AdminHandler, dict( admins=self.admins,pools=self.pools, users=self.users ) ),
 			( r"/login", LoginHandler, dict( admins=self.admins ) ),
-			( r"/pool/([\w\d\.\+ %]+)", PoolHandler, dict( pools=self.pools, users=self.users ) ),
+			( r"/pool/([\w\d\.\+ %]+)", PoolHandler, dict( pools=self.pools, users=self.users ) )
+			#( r"/memory", MemoryDisplayHandler, dict( hp=self.hp ) )
 		], **settings )
 		
 		self.frontendServer = tornado.httpserver.HTTPServer( self.frontendApp )
@@ -100,4 +110,6 @@ class PoolManager:
 		tornado.ioloop.IOLoop.instance().start()
 		
 if __name__ == "__main__":
+	import cProfile
+	#cProfile.run( 'p = PoolManager( "config.json" )' )
 	p = PoolManager( "config.json" )
