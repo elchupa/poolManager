@@ -17,6 +17,8 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 import logging
 
+
+
 class GetWork:
 	def __init__( self, database, poolname ):
 		self.db = database

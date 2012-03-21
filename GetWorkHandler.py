@@ -15,7 +15,7 @@ import threading
 import functools
 
 from tornado.httputil import HTTPHeaders
-
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 from GetWork import GetWork
 from Config import Config
@@ -47,6 +47,9 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 		
 		if body['method'] == "getwork" and body['params'] == []:
 			self.logger.debug( "Get Work Request by: %s", username )
+			#
+			#TODO Covnert this to a tornado asynch request
+			#
 			work_tuple = self.getwork.getWork( username, password )
 			work = work_tuple[0]
 			work['target'] = self.getwork.target
@@ -54,7 +57,9 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 			work['id'] = body['id']
 			if work['error'] == None:
 				self.users.incShare( username, password )
-			
+			#
+			#The above should be in the callback.
+			#
 			if "longpoll" in extensions:
 				self.logger.debug( "Miner Supports Long Polling: %s", username )
 				longpoll = "/LP"
@@ -92,7 +97,7 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 		
 		return ext
 
-if __name__ == "__main__":
+if ___name__ == "__main__":
 	from PoolStore import PoolStore
 	from UserStore import UserStore
 	
