@@ -5,7 +5,6 @@
 """
 
 from Config import Config
-
 import json, base64
 import httplib2
 from binascii import a2b_hex, b2a_hex
