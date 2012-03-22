@@ -28,7 +28,7 @@ class UserStore:
 		except:
 			pass
 			
-		self.con = Connection( self.address, self.port )
+		self.con = Connection( self.address, self.port, max_pool_size = 10 )
 		self.db = self.con[self.database]
 		self.collection = self.db[self.collection]
 		self.collection.ensure_index( "username", unique=True )

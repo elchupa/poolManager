@@ -1,26 +1,57 @@
 """
-	ResourcePool.py -- Provides a method to pool objects to improve concurrent
-		requests for new objects, and hopefully remove the memory issue.
+
+	ResourcePool.py -- Provides a resource pool for objects.
+
 	by elchupa
+
 """
-from Queue import Queue
+
+import thread
+import threading
+
+import Queue
 
 class ResourcePool:
-	def __init__( self, lambda, size=10 ):
-		self.pool = Queue( size )
+	def __init__( self, generate, maxObjects=100 ):
+		self.generate = generate
+		self.pool = Queue.Queue()
+		self.maxObjects = maxObjects
+		self.lock = threading.RLock()
+		
+		for i in range( maxObjects ):
+			self.pool.put( generate() )
+	def __enter__( self ):
+		self.obj = self.pool.get()
 
-		for i in range( size ):
-			self.pool.put( lambda() )
-	def get( self ):
-		return self.pool.get( True )
+		return self.obj
 
-	def put( self, item ):
-		self.pool.put( item )
+	def __exit__( self, t, v, b ):
+		self.pool.put( self.obj )
 
+import random
+def generateNums():
+	return random.random()	
+
+def threadingtest(id, pool ):
+	while True:
+		with pool as i:
+			print id,"=>",i
 
 if __name__ == "__main__":
-	from tornado.httpclient import AsyncHTTPClient, HTTPRequest
-	r = ResourcePool( AsyncHTTPClient )
+	pool = ResourcePool( generateNums, 1000 )
 
+	thread.start_new_thread( threadingtest, (1, pool, ) )
+	thread.start_new_thread( threadingtest, (2, pool, ) )
+	thread.start_new_thread( threadingtest, (3, pool, ) )
+	thread.start_new_thread( threadingtest, (4, pool, ) )
+	thread.start_new_thread( threadingtest, (5, pool, ) )
+	thread.start_new_thread( threadingtest, (6, pool, ) )
+	thread.start_new_thread( threadingtest, (7, pool, ) )
+	thread.start_new_thread( threadingtest, (8, pool, ) )
+	thread.start_new_thread( threadingtest, (9, pool, ) )
 
-
+	try:
+		while 1:
+			pass
+	except:
+		print "Done"

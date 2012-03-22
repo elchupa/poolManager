@@ -8,16 +8,14 @@ from Config import Config
 
 import json, base64
 import httplib2
-import ResourcePool
 from binascii import a2b_hex, b2a_hex
 from Utils import swap32, sha2int, sha2x
 from datetime import datetime
-
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
-
 import logging
 
-
+#resource/thread pool stuff
+from ResourcePool import ResourcePool
+from ThreadPool import ThreadPool
 
 class GetWork:
 	def __init__( self, database, poolname ):
@@ -47,6 +45,14 @@ class GetWork:
 		self.header = { "X-Mining-Extensions": "longpoll", "Authorization": "Basic " + self.authorizationStr, "User-Agent": "polcbm", "Content-Type": "text/plain" }
 		self.url = "http://" + self.address + ":" + str(self.port)
 		
+		#Pool of http objects which will hopefully fix the memory issue.
+		self.httpPool = ResourcePool( self.makeHttp )
+
+	#Used to generate httplib2 objects for the pool
+	def makeHttp( self ):
+		http = httplib2.Http( timeout=self.timeout )
+		return http
+
 	def getWork( self, minerName, minerPassword ):
 	
 		request = json.dumps( { "method": "getwork", "params": [], "id": "json" } )
@@ -59,27 +65,47 @@ class GetWork:
 				},
 				"id": 1
 				}
-		try:
-			http = httplib2.Http( timeout=self.timeout )
+		with self.httpPool as http:
+			self.logger.debug( "Making getwork request" )
 			ret, content = http.request( self.url, "POST", headers=self.header, body=request )
-			
+
 			miner = self.db.addUser( self.poolname, minerName, minerPassword )
-		
+			success = None
 			if miner:
+				success = True
 				try:
 					message = json.loads( content )
 					self.db.incGetWork( self.poolname )
-					del http
-					return message, ret, minerName
 				except:
-					del http
 					self.logger.warn( "Error decoding json" )
 			else:
-				del http
-				return message, None, minerName
-		except Exception, e:
-			self.logger.warn( "Error getting work" )
-		return message, None, minerName
+				success = False
+		#try:
+		#	http = httplib2.Http( timeout=self.timeout )
+		#	ret, content = http.request( self.url, "POST", headers=self.header, body=request )
+		#	
+		#	miner = self.db.addUser( self.poolname, minerName, minerPassword )
+		#
+		#	if miner:
+		#		try:
+		#			message = json.loads( content )
+		#			self.db.incGetWork( self.poolname )
+		#			del http
+		#			return message, ret, minerName
+		#		except:
+		#			del http
+		#			self.logger.warn( "Error decoding json" )
+		#	else:
+		#		del http
+		#		return message, None, minerName
+		#except Exception, e:
+		#	self.logger.warn( "Error getting work" )
+		self.logger.debug( "Was " + minerName + "'s request successful? " + str( success ) )
+		self.db.con.end_request()
+		if success:
+			return message, ret, minerName
+		else:
+			return message, None, minerName
 	
 	def submit( self, minerName, work):
 	
@@ -94,38 +120,70 @@ class GetWork:
 					"error": None,
 					"result": False
 				}
-		try:
-			http = httplib2.Http( timeout=self.timeout )
+		with self.httpPool as http:
+			self.logger.info( "Submitting work from: " + str( minerName ) )
 			ret, content = http.request( self.url, "POST", headers=self.header, body=request )
-			
+			success = False
 			try:
 				message = json.loads( content )
-				
-				#if message['result']:
-				#	self.db.incBlocksFound( self.poolname )
-				
+
 				if validity['status']:
 					message['result'] = False
 					
 				share = self.db.addShare( self.poolname, validity['share'] )
-				
+
 				if share:
 					message['result'] = False
 				else:
 					self.db.incShares( self.poolname )
-					message['result'] = True
-				
+					messagep['result'] = True
+					success = True
 				if not message['result']:
 					self.db.incStales( self.poolname )
-			 	del http
-				return message, ret, minerName
-			except Exception, e:
-				del http
-				self.logger.warn( "Error Decoding Json submit()" )
-		except Exception, e:
-			self.logger.warn( "Error submitting work" )
-		
-		return message, None, minerName
+
+			except:
+				success = False
+
+		self.db.con.end_request()
+		if success:
+			self.logger.info( str( minerName ) + " subbmited a valid share" )
+			return message, ret, minerName
+
+		else:
+			self.logger.info( str( minerName ) + " subbmited a invalid share" )
+			return message, None, minerName
+		#try:
+		#	http = httplib2.Http( timeout=self.timeout )
+		#	ret, content = http.request( self.url, "POST", headers=self.header, body=request )
+		#	
+		#	try:
+		#		message = json.loads( content )
+		#		
+		#		#if message['result']:
+		#		#	self.db.incBlocksFound( self.poolname )
+		#		
+		#		if validity['status']:
+		#			message['result'] = False
+		#			
+		#		share = self.db.addShare( self.poolname, validity['share'] )
+		#		
+		#		if share:
+		#			message['result'] = False
+		#		else:
+		#			self.db.incShares( self.poolname )
+		#			message['result'] = True
+		#		
+		#		if not message['result']:
+		#			self.db.incStales( self.poolname )
+		#	 	del http
+		#		return message, ret, minerName
+		#	except Exception, e:
+		#		del http
+		#		self.logger.warn( "Error Decoding Json submit()" )
+		#except Exception, e:
+		#	self.logger.warn( "Error submitting work" )
+		#
+		#return message, None, minerName
 	
 	def checkWorkValidity( self, minerName, work ):
 		share = self.getShare( minerName, work )

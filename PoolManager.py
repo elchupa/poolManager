@@ -30,12 +30,20 @@ from MemoryDisplayHandler import MemoryDisplayHandler
 
 #Bitcoin Specific
 from LongPoll import LongPoll
+from GetWork import GetWork
+
+#Threading Helpers
+from ThreadPool import ThreadPool
 
 #Utilities
 import base64
 import uuid
 import logging
 #from guppy import hpy
+
+import dowser
+import cherrypy
+from tornado.wsgi import WSGIContainer
 
 class PoolManager:
 	def __init__( self, config ):
@@ -45,6 +53,7 @@ class PoolManager:
 		self.admins = AdminStore( config )
 		#self.hp = hpy()
 		#self.hp.heap()
+		self.getwork = GetWork( self.pools, "triplemining.com" )
 		
 		console = logging.StreamHandler()
 		formatter = logging.Formatter('%(asctime)s: %(name)s - %(levelname)s - %(message)s')
@@ -75,8 +84,11 @@ class PoolManager:
 		self.logger.info( "Creating Tornado Applications" )
 		self.longpoll = LongPoll( self.pools, "triplemining.com" )
 		
+		#TODO: Make this configurable
+		self.threadpool = ThreadPool(  20 )
+
 		self.getworkApp = tornado.web.Application( [ 
-		(r"/", GetWorkHandler, dict(sharedb=self.pools, usersdb=self.users, poolname="triplemining.com", longpoll = self.longpoll ) ),
+		(r"/", GetWorkHandler, dict(usersdb=self.users, poolname="triplemining.com", longpoll = self.longpoll, getwork=self.getwork, threadpool=self.threadpool) ),
 		( r"/LP", LongPollHandler, dict( pools=self.pools, users=self.users, poolname="triplemining.com", longpoll = self.longpoll ) )
 		] )
 		
@@ -88,6 +100,8 @@ class PoolManager:
 			"login_url": "/login"
 		}
 		
+		dowser_app = WSGIContainer( cherrypy.tree.mount( dowser.Root() , '/dowser' ) )
+
 		self.frontendApp = tornado.web.Application( 
 		[ 
 			( r"/", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
@@ -95,7 +109,8 @@ class PoolManager:
 			( r"/getpools", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
 			( r"/admin(/[\w\d\+%]+)?", AdminHandler, dict( admins=self.admins,pools=self.pools, users=self.users ) ),
 			( r"/login", LoginHandler, dict( admins=self.admins ) ),
-			( r"/pool/([\w\d\.\+ %]+)", PoolHandler, dict( pools=self.pools, users=self.users ) )
+			( r"/pool/([\w\d\.\+ %]+)", PoolHandler, dict( pools=self.pools, users=self.users ) ),
+			(r"/dowser.*", tornado.web.FallbackHandler, dict( fallback=dowser_app ) )
 			#( r"/memory", MemoryDisplayHandler, dict( hp=self.hp ) )
 		], **settings )
 		

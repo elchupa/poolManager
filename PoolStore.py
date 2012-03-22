@@ -32,12 +32,13 @@ class PoolStore:
 		except:
 			pass
 		
-		self.con = Connection( self.address, self.port )
+		self.con = Connection( self.address, self.port, max_pool_size=10 )
 		self.db = self.con[self.database]
 		self.collection = self.db[self.collection]
 		self.collection.ensure_index( "name", unique=True )
 		self.users = users
-		
+		print "Created"
+
 	def addPool( self, poolname, address, port, username, password, timeout ):
 		pool = {}
 		pool['name'] = poolname
@@ -170,7 +171,7 @@ if __name__ == "__main__":
 	u = UserStore( "config.json" )
 	p = PoolStore( "config.json", u )
 	
-	pool = p.getPool( "mine" )
+	#pool = p.getPool( "mine" )
 	#pool['stales'] = 0
 	#pool['users'] = []
 	#pool['timeout'] = 5
@@ -178,9 +179,9 @@ if __name__ == "__main__":
 	#pool['getworks'] = 0
 	#pool['lastGetWork'] = datetime.now()
 	#pool['blocksFound'] = 0
-	print p.updatePool( pool )
+	#print p.updatePool( pool )
 	
-	print p.getPool( "mine" )
+	#print p.getPool( "mine" )
 	
 	#print p.addUser( "mine", "testing" )
 	#print p.addUser( "mine", "testing2" )

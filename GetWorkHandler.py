@@ -22,27 +22,27 @@ from Config import Config
 
 import logging
 
+#Difficutly values.
 #ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000
 #00000000000000000000000000000000000000000000000000a4362300000000
 
 class GetWorkHandler( tornado.web.RequestHandler ):
-	def initialize( self, sharedb, usersdb, poolname, longpoll ):
-		self.getwork = GetWork( sharedb, poolname )
+	def initialize( self, usersdb, poolname, longpoll, getwork, threadpool ):
+		self.getwork = getwork
 		self.users = usersdb
 		self.longpoll = longpoll
-
+		self.threadpool = threadpool
 		self.logger = logging.getLogger( "PoolManager.Pool.GetWorkHandler" )
-		
-	
+
 	@tornado.web.asynchronous
 	def post( self ):
 		body = json.loads( self.request.body )
 		username, password = base64.b64decode( self.request.headers['Authorization'][6:] ).split( ":" )
 		extensions = self.parseExtensions( self.request.headers )
-		self.thread = threading.Thread( target=self.postThread, args=( self.postFinish, body, username, password, extensions ) )
-		self.thread.start()
+		self.logger.info( "Adding a new postThread job to thread pool" )
+		self.threadpool.addJob( self.postThread, body, username, password, extensions )
 		
-	def postThread( self, callback, body, username, password, extensions ):
+	def postThread( self, body, username, password, extensions ):
 		ret = None
 		
 		if body['method'] == "getwork" and body['params'] == []:
@@ -81,11 +81,14 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 			answer = self.getwork.submit( ( username, password ), body )
 			ret = answer[0]
 		
-		tornado.ioloop.IOLoop.instance().add_callback(functools.partial(callback, ret))
-		
-	def postFinish( self, response ):
-		self.write( response )
+		#tornado.ioloop.IOLoop.instance().add_callback(functools.partial(callback, ret))
+		self.users.con.end_request()
+
+		self.write( ret )
 		self.finish()
+	#def postFinish( self, response ):
+	#	self.write( response )
+	#	self.finish()
 		
 	def parseExtensions( self, headers ):
 		ext = []
@@ -97,7 +100,7 @@ class GetWorkHandler( tornado.web.RequestHandler ):
 		
 		return ext
 
-if ___name__ == "__main__":
+if __name__ == "__main__":
 	from PoolStore import PoolStore
 	from UserStore import UserStore
 	
