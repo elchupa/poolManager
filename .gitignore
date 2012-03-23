@@ -4,3 +4,4 @@ mongo*
 data/*
 *.swp
 journal*
+_tmp*

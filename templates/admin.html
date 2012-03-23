@@ -14,6 +14,7 @@
 	<div id='page_container'>
 		<div id='admin_actions'><a href='/admin'>Stats</a>|<a href='/admin/manusers'>Manage Users</a>|<a href='/admin/manminers'>Manage Miners</a>|<a href='/admin/manpools'>Manage Pools</a></div>
 	</div>
+	{% block content %}
 	<div id='stats'>
 		<fieldset>
 			<legend>Stats</legend>
@@ -22,5 +23,6 @@
 			Total Miners: {{ total_miners }}<br />
 			Have submitted {{ total_shares }} shares to {{ total_pools }} pools.
 	</div>
+	{% end %}
 	</body>
 </html>

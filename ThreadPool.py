@@ -10,18 +10,18 @@ from Queue import Queue
 import logging
 
 class Worker( threading.Thread ):
-	def __init__( self, jobs ):
+	def __init__( self, event, jobs ):
 		threading.Thread.__init__( self )
 
 		self.jobs = jobs
 		self.daemon = True
-		self.work = True
+		self.event = event
 		self.start()
 
 		self.logger = logging.getLogger( "ThreadPool.Worker" )
 
 	def run( self ):
-		while self.work:
+		while not self.event.is_set():
 			func, args, kargs = self.jobs.get()
 			self.logger.info( "Got Work" )
 			try: 
@@ -29,12 +29,14 @@ class Worker( threading.Thread ):
 			except Exception, e:
 				self.logger.info( str( e ) )
 			self.jobs.task_done()
+		print "Killed"
 class ThreadPool:
 	def __init__( self, numThreads = 10 ):
 		self.jobs = Queue( numThreads )
-		
+		self.event = threading.Event()
+
 		for _ in range( numThreads ):
-			Worker( self.jobs )
+			Worker( self.event, self.jobs )
 
 		self.logger = logging.getLogger( "ThreadPool.ThreadPool" )
 
@@ -44,6 +46,9 @@ class ThreadPool:
 	
 	def waitAll( self ):
 		self.jobs.join()
+	
+	def killAll( self ):
+		self.event.set();
 
 if __name__ == "__main__":
 
@@ -51,10 +56,12 @@ if __name__ == "__main__":
 	def test( t ):
 		print "yay: " + str( t )
 		sleep( 1 )
+	def kill( event ):
+		sleep( 5 )
+		event.set()
+	pool = ThreadPool( 10000 )
 
-	pool = ThreadPool( 5 )
-
-	for i in range( 100 ):
+	for i in range( 100000 ):
 		pool.addJob( test, i )
 
 	pool.waitAll()
