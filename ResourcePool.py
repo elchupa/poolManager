@@ -28,23 +28,26 @@ class ResourcePool:
 	def __exit__( self, t, v, b ):
 		self.pool.put( self.obj )
 
-import random
-def generateNums():
-	return random.random()	
 
-def threadingtest(id, pool ):
-	while True:
-		with pool as i:
-			print id,"=>",i
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
-	pool = ResourcePool( generateNums, 1000 )
-
-	thread.start_new_thread( threadingtest, (1, pool, ) )
-	thread.start_new_thread( threadingtest, (2, pool, ) )
-	thread.start_new_thread( threadingtest, (3, pool, ) )
-	thread.start_new_thread( threadingtest, (4, pool, ) )
-	thread.start_new_thread( threadingtest, (5, pool, ) )
+	import random
+	def generateNums():          
+		return random.random()	
+        from time import sleep                                
+	def threadingtest(id, pool ):           
+		while True:                     
+			with pool as i:         
+				print id,"=>",i 
+				sleep( 1 )
+	pool = ResourcePool( generateNums )
 	thread.start_new_thread( threadingtest, (6, pool, ) )
 	thread.start_new_thread( threadingtest, (7, pool, ) )
 	thread.start_new_thread( threadingtest, (8, pool, ) )
