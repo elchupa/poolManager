@@ -10,8 +10,8 @@ from datetime import datetime
 
 class LoginHandler(tornado.web.RequestHandler):
 	
-	def initialize( self, admins ):
-		self.admins = admins
+	def initialize( self ):
+		self.admins = self.application.admins
 		self.logger = logging.getLogger( "PoolManager.Http.LoginHandler" )
 		
 	def get( self ):

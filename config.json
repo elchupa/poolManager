@@ -6,7 +6,8 @@
 	},
 	"pool":
 	{
-		"port": 8337
+		"port": 8337,
+		"defaultPool": "eligius"
 	},
 	"http":
 	{

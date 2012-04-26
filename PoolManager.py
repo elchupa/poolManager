@@ -51,9 +51,7 @@ class PoolManager:
 		self.users = UserStore( config )
 		self.pools = PoolStore( config, self.users )
 		self.admins = AdminStore( config )
-		#self.hp = hpy()
-		#self.hp.heap()
-		self.getwork = GetWork( self.pools, "triplemining.com" )
+		self.getwork = GetWork( self.pools, self.config['pool']['defaultPool'] )
 		
 		console = logging.StreamHandler()
 		formatter = logging.Formatter('%(asctime)s: %(name)s - %(levelname)s - %(message)s')
@@ -88,9 +86,16 @@ class PoolManager:
 		self.threadpool = ThreadPool(  20 )
 
 		self.getworkApp = tornado.web.Application( [ 
-		(r"/", GetWorkHandler, dict(usersdb=self.users, poolname="triplemining.com", longpoll = self.longpoll, getwork=self.getwork, threadpool=self.threadpool) ),
-		( r"/LP", LongPollHandler, dict( pools=self.pools, users=self.users, poolname="triplemining.com", longpoll = self.longpoll ) )
+		(r"/", GetWorkHandler ),
+		( r"/LP", LongPollHandler )
 		] )
+
+		self.getworkApp.pools = self.pools
+		self.getworkApp.users = self.users
+		self.getworkApp.getwork = self.getwork
+		self.getworkApp.poolname = self.config['pool']['defaultPool']
+		self.getworkApp.longpoll = self.longpoll
+		self.getworkApp.threadpool = self.threadpool
 		
 		self.logger.info( "Creating HTTPServers for the Web interfave and the pool backend." )
 		self.getworkServer = tornado.httpserver.HTTPServer(self.getworkApp)
@@ -104,15 +109,22 @@ class PoolManager:
 
 		self.frontendApp = tornado.web.Application( 
 		[ 
-			( r"/", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
-			( r"/getusers", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
-			( r"/getpools", DefaultHandler, dict( sharedb=self.pools, userdb=self.users, poolname="triplemining.com" ) ),
-			( r"/admin(/[\w\d\+%]+)?", AdminHandler, dict( admins=self.admins,pools=self.pools, users=self.users ) ),
-			( r"/login", LoginHandler, dict( admins=self.admins ) ),
-			( r"/pool/([\w\d\.\+ %]+)", PoolHandler, dict( pools=self.pools, users=self.users ) ),
-			(r"/dowser.*", tornado.web.FallbackHandler, dict( fallback=dowser_app ) )
+			( r"/", DefaultHandler ),
+			( r"/getusers", DefaultHandler ),
+			( r"/getpools", DefaultHandler ),
+			( r"/admin(/[\w\d\+%]+)?", AdminHandler ),
+			( r"/login", LoginHandler ),
+			( r"/pool/([\w\d\.\+ %]+)", PoolHandler ),
+			(r"/dowser.*", tornado.web.FallbackHandler )
 			#( r"/memory", MemoryDisplayHandler, dict( hp=self.hp ) )
 		], **settings )
+
+
+		self.frontendApp.pools = self.pools
+		self.frontendApp.users = self.users
+		self.frontendApp.admins = self.admins
+		self.frontendApp.getwork = self.getwork
+		self.frontendApp.poolname = self.config['pool']['defaultPool']
 		
 		self.frontendServer = tornado.httpserver.HTTPServer( self.frontendApp )
 		

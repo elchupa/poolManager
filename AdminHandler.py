@@ -9,10 +9,10 @@ import tornado.web
 import logging
 
 class AdminHandler( tornado.web.RequestHandler ):
-	def initialize( self, admins, pools, users ):
-		self.pools = pools
-		self.users = users
-		self.admins = admins
+	def initialize( self ):
+		self.pools = self.application.pools
+		self.users = self.application.users
+		self.admins = self.application.admins
 		self.logger = logging.getLogger( "PoolManager.Http.AdminHandler" )
 		
 	def get_login_url( self ):

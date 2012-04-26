@@ -186,4 +186,4 @@ if __name__ == "__main__":
 	#print p.addUser( "mine", "testing" )
 	#print p.addUser( "mine", "testing2" )
 	
-	pool = p.addPool( "triplemining.com", "eu.triplemining.com", 8344, "elchupa_elchupa", "elchupa", 10 )
+	pool = p.addPool( "eligius", "ra.mining.eligius.st", 8337, "1JJLw5zUps6EzRPu6T4BcMJNeU2JpoBHb3", "x", 10 )

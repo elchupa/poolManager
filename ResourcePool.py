@@ -28,15 +28,6 @@ class ResourcePool:
 	def __exit__( self, t, v, b ):
 		self.pool.put( self.obj )
 
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
 	import random
 	def generateNums():          
@@ -52,6 +43,7 @@ if __name__ == "__main__":
 	thread.start_new_thread( threadingtest, (7, pool, ) )
 	thread.start_new_thread( threadingtest, (8, pool, ) )
 	thread.start_new_thread( threadingtest, (9, pool, ) )
+	thread.start_new_thread( threadingtest, (10, pool, ) )
 
 	try:
 		while 1:

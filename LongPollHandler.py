@@ -18,11 +18,11 @@ import logging
 from datetime import datetime
 
 class LongPollHandler( tornado.web.RequestHandler ):
-	def initialize( self, pools,  users, poolname, longpoll ):
-		self.users = users
-		self.pools = pools
-		self.poolname = poolname
-		self.longpoll = longpoll
+	def initialize( self ):
+		self.users = self.application.users
+		self.pools = self.application.pools
+		self.poolname = self.application.poolname
+		self.longpoll = self.application.longpoll
 		self.thread = None
 		
 		self.logging = logging.getLogger( "PoolManager.Pool.LongPoolHandler" )

@@ -9,10 +9,10 @@ import tornado.web
 import logging
 
 class DefaultHandler( tornado.web.RequestHandler ):
-	def initialize( self, sharedb, userdb, poolname ):
-		self.pooldb = sharedb
-		self.userdb = userdb
-		self.poolname = poolname
+	def initialize( self ):
+		self.pooldb = self.application.pools
+		self.userdb = self.application.users
+		self.poolname = self.application.poolname
 		
 		self.logger = logging.getLogger( "PoolManager.Http.DefaultHandler" )
 		

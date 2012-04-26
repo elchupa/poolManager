@@ -52,6 +52,30 @@ class GetWork:
 		http = httplib2.Http( timeout=self.timeout )
 		return http
 
+	def changePool( self, poolName ):
+		config = None
+
+		try:
+			config = self.db.getPool( poolName )
+		except:
+			pass
+
+		if config != None:
+			self.config = config
+			self.address = self.config['address']
+			self.port = self.config['port']
+			self.username = self.config['username']
+			self.password = self.config['password']
+			self.timeout = int( self.config['timeout'] )
+
+			self.authorizationStr = base64.b64encode( self.username + ":" + self.password ).replace( '\n', '' )
+			self.header = { "X-Mining-Extensions": "longpoll", "Authorization": "Base " + self.authorizationStr, "User-Agent": "polcbm", "Content-Type": "text/plain" }
+			self.url = "http://" + self.address + ":" + str( self.port )
+		else:
+			self.logger.error( "No Pool with name: " + poolName )
+			return False
+		return True
+
 	def getWork( self, minerName, minerPassword ):
 	
 		request = json.dumps( { "method": "getwork", "params": [], "id": "json" } )

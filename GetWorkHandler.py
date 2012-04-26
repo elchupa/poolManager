@@ -27,11 +27,11 @@ import logging
 #00000000000000000000000000000000000000000000000000a4362300000000
 
 class GetWorkHandler( tornado.web.RequestHandler ):
-	def initialize( self, usersdb, poolname, longpoll, getwork, threadpool ):
-		self.getwork = getwork
-		self.users = usersdb
-		self.longpoll = longpoll
-		self.threadpool = threadpool
+	def initialize( self ):
+		self.getwork = self.application.getwork
+		self.users = self.application.users
+		self.longpoll = self.application.longpoll
+		self.threadpool = self.application.threadpool
 		self.logger = logging.getLogger( "PoolManager.Pool.GetWorkHandler" )
 
 	@tornado.web.asynchronous
