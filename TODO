@@ -1,3 +1,4 @@
 Rewrite the getwork code to use tornado's async client instead of the httplib2 client.
 	- causing issues with memory and using tornado's will lower the numbero of
 		objects and threads.
+Figuring out what is causing the connection issues.
